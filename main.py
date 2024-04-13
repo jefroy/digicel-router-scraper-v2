@@ -6,12 +6,18 @@ from selenium.webdriver.support import expected_conditions as EC
 import logging
 from bs4 import BeautifulSoup
 import json
+import socket
+import pandas as pd
+import os
 
 # Set up logging
 logging.basicConfig(filename='selenium_errors.log', level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
 target_url = "http://192.168.100.1/html/bbsp/pcp/pcp.asp"
+
+hostname = socket.gethostname()
+target_dump_path = f"C:\\Users\\idisc\\OneDrive\\Documents\\APPS\\{hostname}-ports\\"
 
 # Configure ChromeOptions to run headless
 options = Options()
@@ -78,6 +84,26 @@ try:
     json_data = json.dumps(filtered_data, indent=4)
     print(json_data)
 
+    filename = target_dump_path + f"ports"
+
+    # Check if the directory exists, and if not, create it
+    if not os.path.exists(target_dump_path):
+        os.makedirs(target_dump_path)
+        print(f"Directory created at {target_dump_path}")
+    else:
+        print(f"Directory already exists at {target_dump_path}")
+
+    with open(filename + ".json", 'w') as json_file:
+        json.dump(json_data, json_file)
+
+    # Convert list of dictionaries to a DataFrame
+    df = pd.DataFrame(filtered_data)
+
+    # Define the CSV file path
+    csv_file_path = filename + ".csv"
+
+    # Writing data to CSV
+    df.to_csv(csv_file_path, index=False)
 
 
 except Exception as e:
