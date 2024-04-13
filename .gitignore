@@ -1,3 +1,8 @@
+.vs
+.vsc
+.idea
+shit/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
