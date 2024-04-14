@@ -1,5 +1,4 @@
 @echo off
-
-start runner.ps1
-
+CALL "C:\ProgramData\anaconda3\Scripts\activate.bat" root
+python main.py
 pause
