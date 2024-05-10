@@ -12,6 +12,15 @@ import json
 import socket
 import pandas as pd
 import os
+from dotenv import load_dotenv
+
+from utils import generate_rdp
+
+# Load environment variables
+load_dotenv()
+
+# Retrieve environment variables
+dump_path = os.getenv('DUMP_PATH')
 
 # Logging setup
 logging.basicConfig(filename='selenium_errors.log', level=logging.INFO,
@@ -20,7 +29,7 @@ logging.basicConfig(filename='selenium_errors.log', level=logging.INFO,
 # URLs and paths
 target_url = "http://192.168.100.1/html/bbsp/pcp/pcp.asp"
 hostname = socket.gethostname()
-target_dump_path = f"C:\\Users\\idisc\\OneDrive\\Documents\\APPS\\{hostname}-ports\\"
+target_dump_path = f"{dump_path}\\{hostname}-ports\\"
 
 # Configure ChromeOptions to run headless
 options = Options()
@@ -69,6 +78,7 @@ while True:
 
         json_data = json.dumps(filtered_data, indent=4)
         print(json_data)
+        json_data = json.loads(json_data)
 
         filename = target_dump_path + f"ports"
         if not os.path.exists(target_dump_path):
@@ -83,6 +93,8 @@ while True:
         df = pd.DataFrame(filtered_data)
         csv_file_path = filename + ".csv"
         df.to_csv(csv_file_path, index=False)
+
+        generate_rdp(f"{filename}.json", f"{target_dump_path}{hostname}.rdp")
 
     except Exception as e:
         logging.error("An error occurred: %s", e)
