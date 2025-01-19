@@ -2,6 +2,7 @@
 .vsc
 .idea
 shit/
+chrome-win64/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

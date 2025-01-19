@@ -32,12 +32,17 @@ hostname = socket.gethostname()
 target_dump_path = f"{dump_path}\\{hostname}-ports\\"
 
 # Configure ChromeOptions to run headless
+# blank screen: https://stackoverflow.com/questions/78996364/chrome-129-headless-shows-blank-window
 options = Options()
-options.add_argument("--headless")
+options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--window-size=1920x1080")
+options.add_argument("--disable-extensions")
+options.add_argument("--disable-notifications")
+options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.5790.171 Safari/537.36')
+options.add_argument("--window-position=-2400,-2400")
 
 executable_path = "path_to_chromedriver"  # Update to your Chromedriver's path
 
