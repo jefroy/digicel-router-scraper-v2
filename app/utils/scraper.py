@@ -25,17 +25,20 @@ class PortForwardScraper:
 
         for row in table.find_all('tr')[1:]:  # Skip header row
             cols = row.find_all('td')
-            if cols[1].text.strip() == "Manual":  # Only process manual entries
-                row_data = {
-                    headers[i]: col.text.strip()
-                    for i, col in enumerate(cols)
-                    if headers[i]  # Only process if header exists
-                }
-                try:
-                    port_forward = PortForward.parse_obj(row_data)
-                    port_forwards.append(port_forward)
-                except Exception as e:
-                    logger.error(f"Error parsing row: {e}")
+            if len(cols) >= len(headers):  # Ensure we have enough columns
+                row_data = {}
+                for i, col in enumerate(cols):
+                    if i < len(headers) and headers[i]:  # Only process if header exists
+                        row_data[headers[i]] = col.text.strip()
+
+                if row_data.get("Configuration Mode") == "Manual":  # Only process manual entries
+                    try:
+                        port_forward = PortForward.parse_obj(row_data)
+                        port_forwards.append(port_forward)
+                        logger.debug(f"Successfully parsed port forward: {port_forward}")
+                    except Exception as e:
+                        logger.error(f"Error parsing row: {e}")
+                        logger.debug(f"Row data: {row_data}")
 
         return port_forwards
 
@@ -68,8 +71,11 @@ class PortForwardScraper:
 
             # Parse and save data
             port_forwards = self.parse_table(driver.page_source)
+            logger.debug(f"Found {len(port_forwards)} port forwards")
+
             if port_forwards:
                 self.save_data(port_forwards)
+                logger.info(f"Saved {len(port_forwards)} port forwards")
 
             return port_forwards
 

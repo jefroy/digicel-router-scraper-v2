@@ -1,14 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 class PortForward(BaseModel):
-    protocol: str
-    config_mode: str
-    internal_ip: str
-    internal_port: str
-    external_port: str
-    external_ipv4_address: str
-    status: str
+    config_mode: str = Field(..., alias="Configuration Mode")
+    external_ipv4_address: str = Field(..., alias="External IPv4 Address")
+    external_port: str = Field(..., alias="External Port")
+    internal_port: str = Field(..., alias="Internal Port")
+    protocol: str = Field(..., alias="Protocol")
+    internal_ip: str = Field(..., alias="Internal IPv4 Address")
+    status: str = Field(..., alias="PCP Server Result Code")
+    allow_proposal: str = Field(..., alias="Allow PCP Port Proposal [Y/N]")
 
     @property
     def is_rdp(self) -> bool:
@@ -19,5 +20,4 @@ class PortForward(BaseModel):
         return f"{self.external_ipv4_address}:{self.external_port}"
 
     class Config:
-        alias_generator = lambda s: s.replace('_', ' ').title()
         populate_by_name = True
