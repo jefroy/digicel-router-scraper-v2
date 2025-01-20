@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from contextlib import contextmanager
 import logging
 
-from .config import settings
+from app.utils.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ class BrowserManager:
                 driver.quit()
 
     def login_to_router(self, driver: webdriver.Chrome) -> bool:
+        """Login to router with configured credentials"""
         try:
             logger.info("Attempting to log in to router...")
             driver.get(settings.ROUTER_URL)

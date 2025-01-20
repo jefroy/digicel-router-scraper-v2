@@ -1,12 +1,12 @@
+# app/main.py
 import asyncio
 import logging
 from pathlib import Path
 import time
 
-from utils.config import settings
-from utils.browser import BrowserManager
-from utils.scraper import PortForwardScraper
-from utils.rdp import RDPGenerator
+from app.utils.config import settings
+from app.utils.browser import BrowserManager
+from app.utils.scraper import PortForwardScraper
 
 # Setup logging
 logging.basicConfig(
@@ -23,24 +23,23 @@ logger = logging.getLogger(__name__)
 async def main():
     browser_manager = BrowserManager()
     scraper = PortForwardScraper()
-    rdp_generator = RDPGenerator()
 
     while True:
         try:
             with browser_manager.get_browser() as driver:
                 if browser_manager.login_to_router(driver):
+                    logger.info("Successfully logged in")
+
                     # Scrape port forwards
                     port_forwards = await scraper.scrape(driver)
+                    logger.info(f"Found {len(port_forwards)} port forwards")
 
-                    # Generate RDP file for any RDP port forwards
-                    rdp_port_forwards = [pf for pf in port_forwards if pf.is_rdp]
-                    if rdp_port_forwards:
-                        rdp_generator.generate_rdp_file(
-                            rdp_port_forwards[0],
-                            settings.OUTPUT_DIR / f"{settings.HOSTNAME}.rdp"
-                        )
-
-                    logger.info(f"Completed iteration, waiting {settings.REFRESH_INTERVAL} seconds")
+                    # Log RDP forwards specifically
+                    rdp_forwards = [pf for pf in port_forwards if pf.is_rdp]
+                    if rdp_forwards:
+                        logger.info(f"Found {len(rdp_forwards)} RDP port forwards")
+                    else:
+                        logger.info("No RDP port forwards found")
                 else:
                     logger.error("Failed to log in to router")
 
@@ -49,6 +48,7 @@ async def main():
 
         finally:
             # Wait for next iteration
+            logger.info(f"Waiting {settings.REFRESH_INTERVAL} seconds before next check")
             await asyncio.sleep(settings.REFRESH_INTERVAL)
 
 if __name__ == "__main__":
