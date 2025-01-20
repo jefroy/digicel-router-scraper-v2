@@ -1,19 +1,24 @@
-# app/main.py
 import asyncio
 import logging
 from pathlib import Path
 import time
+import os
 
 from app.utils.config import settings
 from app.utils.browser import BrowserManager
 from app.utils.scraper import PortForwardScraper
+
+# Create logs directory if it doesn't exist
+log_dir = Path(__file__).parent.parent / "logs"
+log_dir.mkdir(exist_ok=True)
+log_file = log_dir / "app.log"
 
 # Setup logging
 logging.basicConfig(
     level=settings.LOG_LEVEL,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(Path("logs/app.log")),
+        logging.FileHandler(log_file),
         logging.StreamHandler()
     ]
 )
@@ -52,4 +57,10 @@ async def main():
             await asyncio.sleep(settings.REFRESH_INTERVAL)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Shutting down gracefully...")
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        raise
