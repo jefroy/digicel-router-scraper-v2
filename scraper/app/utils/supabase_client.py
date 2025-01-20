@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import httpx
 import logging
 from datetime import datetime
@@ -15,14 +15,67 @@ class SupabaseManager:
             "apikey": settings.SUPABASE_SERVICE_ROLE_KEY,
             "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
             "Content-Type": "application/json",
-            "Prefer": "return=minimal"
+            "Prefer": "return=representation"  # Get back the inserted/updated records
         }
         self.hostname = socket.gethostname()
 
+    async def get_current_port_forwards(self, client: httpx.AsyncClient) -> List[Dict]:
+        """Get current active port forwards for this host"""
+        url = f"{self.base_url}/port_forwards"
+        params = {
+            "host_name": f"eq.{self.hostname}",
+            "is_active": "eq.true",
+            "select": "external_ipv4_address,external_port,internal_port,protocol,internal_ip"
+        }
+
+        response = await client.get(url, headers=self.headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        return []
+
+    def has_changes(self, current: List[Dict], new_forwards: List[PortForward]) -> bool:
+        """Check if there are any changes in the port forwards"""
+        if len(current) != len(new_forwards):
+            return True
+
+        # Create sets of tuples for comparison
+        current_set = {
+            (
+                pf['external_ipv4_address'],
+                pf['external_port'],
+                pf['internal_port'],
+                pf['protocol'],
+                pf['internal_ip']
+            ) for pf in current
+        }
+
+        new_set = {
+            (
+                pf.external_ipv4_address,
+                pf.external_port,
+                pf.internal_port,
+                pf.protocol,
+                pf.internal_ip
+            ) for pf in new_forwards
+        }
+
+        return current_set != new_set
+
     async def update_port_forwards(self, port_forwards: List[PortForward]) -> None:
-        """Update port forwards in Supabase database"""
+        """Update port forwards in Supabase database only if there are changes"""
         try:
             async with httpx.AsyncClient() as client:
+                # Get current port forwards
+                current = await self.get_current_port_forwards(client)
+
+                # Check if there are any changes
+                if not self.has_changes(current, port_forwards):
+                    logger.info("No changes detected in port forwards. Skipping update.")
+                    return
+
+                # If we have changes, proceed with update
+                logger.info("Changes detected in port forwards. Updating database...")
+
                 # First, mark all existing records for this host as inactive
                 update_url = f"{self.base_url}/port_forwards"
                 update_params = {
