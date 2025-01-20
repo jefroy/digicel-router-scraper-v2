@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 from selenium import webdriver
 
-from ..models.port_forward import PortForward
-from .config import settings
+from app.models.port_forward import PortForward
+from app.utils.config import settings
 
 logger = logging.getLogger(__name__)
 
