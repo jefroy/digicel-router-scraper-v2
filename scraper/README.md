@@ -26,14 +26,29 @@ git clone https://github.com/yourusername/digicel-router-scraper.git
 cd digicel-router-scraper
 ```
 
-2. Create your environment file:
+2. Create and configure your environment file:
 ```bash
 cp .env.example .env
+nano .env  # Edit with your Supabase credentials and other settings
 ```
 
-3. Edit the .env file with your specific configuration:
+3. Create required directories and set permissions:
 ```bash
-nano .env
+mkdir -p logs data
+chmod -R 777 logs data
+```
+
+4. Build and start the container:
+```bash
+docker-compose up -d
+```
+
+### Alternative: Using Installation Script
+
+For easier setup, you can use the provided installation script:
+```bash
+chmod +x install.sh
+./install.sh
 ```
 
 ## Usage
@@ -73,6 +88,44 @@ pip install -r requirements.txt
 ```bash
 python -m app.main
 ```
+
+### Monitoring Logs
+
+View logs in real-time:
+```bash
+docker-compose logs -f
+```
+
+Or check the log file directly:
+```bash
+tail -f logs/app.log
+```
+
+### Managing the Container
+
+Start the container:
+```bash
+docker-compose up -d
+```
+
+Stop the container:
+```bash
+docker-compose down
+```
+
+Restart the container:
+```bash
+docker-compose restart
+```
+
+### Portainer Integration
+
+The container will automatically appear in your Portainer dashboard. You can:
+- Monitor container status
+- View logs in real-time
+- Manage container lifecycle (start/stop/restart)
+- Check resource usage
+
 
 ## Configuration
 
