@@ -48,14 +48,18 @@ if [ $? -ne 0 ]; then
 fi
 echo "Found Docker Compose: $compose_version"
 
-# Stop any existing containers gracefully
-echo "Stopping any existing containers..."
-docker-compose down --remove-orphans || true
+# Stop only digicel containers
+echo "Stopping any existing digicel containers..."
+if [ "$(docker ps -aq -f name=digicel-port-scraper)" ]; then
+    docker stop digicel-port-scraper
+    docker rm digicel-port-scraper
+fi
 
-# Clean up any old containers and images
-echo "Cleaning up old containers and images..."
-docker rm -f digicel-port-scraper 2>/dev/null || true
-docker rmi -f digicel-router-scraper-v2_scraper 2>/dev/null || true
+# Clean up only digicel images
+echo "Cleaning up old digicel images..."
+if [ "$(docker images -q digicel-router-scraper-v2_scraper 2>/dev/null)" ]; then
+    docker rmi digicel-router-scraper-v2_scraper
+fi
 
 # Build and start containers
 echo "Building and starting containers..."
@@ -71,6 +75,9 @@ if [ "$(docker ps -q -f name=digicel-port-scraper)" ]; then
     echo "Installation successful!"
     echo "Container is now running. You can view logs with:"
     echo "docker-compose logs -f"
+    echo ""
+    echo "Status of digicel scraper:"
+    docker ps | grep digicel
 else
     echo "Error: Container failed to start. Please check logs:"
     docker-compose logs
