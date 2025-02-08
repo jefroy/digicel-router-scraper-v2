@@ -9,6 +9,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
+      - ./.env:/app/.env  # Add this line to mount the .env file
     environment:
       - DUMP_PATH=/app/data
       - LOG_LEVEL=INFO
@@ -18,8 +19,10 @@ services:
       - REFRESH_INTERVAL=300
       - CHROME_HEADLESS=true
       - ENABLE_FILE_DUMP=true
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     restart: unless-stopped
-    network_mode: host  # Required to access router on local network
+    network_mode: host
     deploy:
       resources:
         limits:
