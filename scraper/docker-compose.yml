@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  scraper:
+  digicel-port-scraper:  # More descriptive service name
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: digicel-router-scraper
+    container_name: digicel-port-scraper
     volumes:
       - ./data:/app/data
-      - ./logs:/app/logs
-      - ./.env:/app/.env  # Add this line to mount the .env file
+      - ./logs:/app/logs/digicel  # Separate log directory
+      - ./.env:/app/.env
     environment:
       - DUMP_PATH=/app/data
       - LOG_LEVEL=INFO
@@ -22,7 +22,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
     restart: unless-stopped
-    network_mode: host
+    network_mode: host  # Required for router access
     deploy:
       resources:
         limits:
@@ -32,7 +32,7 @@ services:
           memory: 512M
           cpus: '0.25'
     healthcheck:
-      test: ["CMD", "python", "-c", "import os; os.path.exists('/app/logs/app.log') and exit(0) or exit(1)"]
+      test: ["CMD", "python", "-c", "import os; os.path.exists('/app/logs/digicel/app.log') and exit(0) or exit(1)"]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -42,3 +42,4 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+        labels: "digicel-port-scraper"  # Proper labeling for log identification
