@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   scraper:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: digicel-router-scraper
     volumes:
       - ./data:/app/data
@@ -14,5 +16,26 @@ services:
       - ROUTER_USERNAME=Digicel
       - ROUTER_PASSWORD=Digicel
       - REFRESH_INTERVAL=300
+      - CHROME_HEADLESS=true
+      - ENABLE_FILE_DUMP=true
     restart: unless-stopped
     network_mode: host  # Required to access router on local network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; os.path.exists('/app/logs/app.log') and exit(0) or exit(1)"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
