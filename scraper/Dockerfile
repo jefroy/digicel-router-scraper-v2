@@ -12,20 +12,24 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && useradd -m -r -s /bin/bash scraper
 
-# Set working directory and ownership
+# Set working directory
 WORKDIR /app
-RUN chown scraper:scraper /app
+
+# Create necessary directories and set permissions
+RUN mkdir -p /app/data /app/logs \
+    && chown -R scraper:scraper /app \
+    && chmod -R 755 /app \
+    && chmod 777 /app/logs  # Ensure logs directory is writable
 
 # Copy requirements first to leverage Docker cache
-COPY --chown=scraper:scraper requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY --chown=scraper:scraper app/ ./app/
+COPY app/ ./app/
 
-# Create necessary directories with proper permissions
-RUN mkdir -p /app/data /app/logs \
-    && chown -R scraper:scraper /app/data /app/logs
+# Change ownership of all files
+RUN chown -R scraper:scraper /app
 
 # Switch to non-root user
 USER scraper
