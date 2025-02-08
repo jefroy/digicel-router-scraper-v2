@@ -1,0 +1,25 @@
+# Core dependencies
+selenium==4.16.0
+beautifulsoup4==4.12.2
+pandas==2.2.2
+numpy==1.26.4
+
+# API and networking
+httpx==0.26.0       # For async HTTP requests
+aiohttp==3.10.11
+urllib3==2.2.2
+certifi==2024.7.4
+idna==3.7
+
+# Configuration and settings
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Webdriver management
+webdriver-manager==4.0.1
+
+# Date and time handling
+python-dateutil==2.9.0.post0
+pytz==2024.1
+tzdata==2024.1
